@@ -1,0 +1,185 @@
+<div id="app">
+    <header class="app-header">
+        <h1><i class="fa-solid fa-wallet"></i> My Personal Manager</h1>
+        <div class="header-actions">
+            <span id="current-currency">EGP</span>
+        </div>
+    </header>
+
+    <main class="app-content">
+        <!-- ড্যাশবোর্ড -->
+        <section id="tab-dashboard" class="tab-content active">
+            <h2>ড্যাশবোর্ড</h2>
+            <div class="summary-cards">
+                <div class="card bg-primary"><h3>নগদ ক্যাশ</h3><p id="dash-cash">0.00 EGP</p></div>
+                <div class="card bg-info"><h3>ব্যাংক অ্যাকাউন্ট</h3><p id="dash-bank">0.00 EGP</p></div>
+                <div class="card bg-success"><h3>মোবাইল ওয়ালেট</h3><p id="dash-wallet">0.00 EGP</p></div>
+                <div class="card bg-success-light"><h3>এ মাসের মোট আয়</h3><p id="dash-income">0.00 EGP</p></div>
+                <div class="card bg-danger-light"><h3>এ মাসের মোট খরচ</h3><p id="dash-expense">0.00 EGP</p></div>
+                <div class="card bg-warning"><h3>মোট সঞ্চয়</h3><p id="dash-savings">0.00 EGP</p></div>
+                <div class="card bg-danger"><h3>আমার দেনা (ঋণ)</h3><p id="dash-debt-owed">0.00 EGP</p></div>
+                <div class="card bg-success"><h3>পাওনা (অন্যের কাছে)</h3><p id="dash-receivable">0.00 EGP</p></div>
+            </div>
+            <div class="dashboard-extra">
+                <div class="budget-status-box" style="background:#fff; padding:12px; border-radius:10px; margin-bottom:15px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                    <h3>মাসিক বাজেট অবস্থা</h3>
+                    <p>অবশিষ্ট বাজেট: <span id="dash-rem-budget">0.00 EGP</span></p>
+                    <p>অতিরিক্ত খরচ: <span id="dash-overspend" class="text-danger">0.00 EGP</span></p>
+                </div>
+            </div>
+            <div class="recent-section">
+                <h3>সাম্প্রতিক লেনদেন</h3>
+                <div id="dash-recent-list" class="transaction-list"></div>
+            </div>
+        </section>
+
+        <!-- আয় -->
+        <section id="tab-income" class="tab-content">
+            <h2>আয় ব্যবস্থাপনা</h2>
+            <button class="btn btn-primary" onclick="openIncomeModal()"><i class="fa-solid fa-plus"></i> আয় যোগ করুন</button>
+            <div class="filter-box"><input type="text" id="search-income" placeholder="আয় খুঁজুন..." oninput="filterIncome()"></div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead><tr><th>তারিখ</th><th>উৎস</th><th>পরিমাণ</th><th>অ্যাকাউন্ট</th><th>বিবরণ</th><th>অ্যাকশন</th></tr></thead>
+                    <tbody id="income-table-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- খরচ -->
+        <section id="tab-expense" class="tab-content">
+            <h2>খরচ ব্যবস্থাপনা</h2>
+            <button class="btn btn-danger" onclick="openExpenseModal()"><i class="fa-solid fa-plus"></i> খরচ যোগ করুন</button>
+            <div class="filter-box"><input type="text" id="search-expense" placeholder="খরচ খুঁজুন..." oninput="filterExpense()"></div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead><tr><th>তারিখ</th><th>ক্যাটাগরি</th><th>পরিমাণ</th><th>অ্যাকাউন্ট</th><th>বিবরণ</th><th>অ্যাকশন</th></tr></thead>
+                    <tbody id="expense-table-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- বাজেট -->
+        <section id="tab-budget" class="tab-content">
+            <h2>মাসিক বাজেট পরিকল্পনা</h2>
+            <button class="btn btn-primary" onclick="openBudgetModal()"><i class="fa-solid fa-gear"></i> বাজেট সেট করুন</button>
+            <div id="budget-report-list" class="budget-report-container" style="margin-top:15px;"></div>
+        </section>
+
+        <!-- ঋণ -->
+        <section id="tab-debt" class="tab-content">
+            <h2>ঋণ ও পাওনা হিসাব</h2>
+            <div class="debt-toggle-buttons" style="margin-bottom:15px;">
+                <button class="btn btn-sm btn-outline active" onclick="switchDebtTab('owed-by-me', this)">আমার দেনা</button>
+                <button class="btn btn-sm btn-outline" onclick="switchDebtTab('owed-to-me', this)">পাওনা টাকা</button>
+            </div>
+            <div id="section-owed-by-me" class="debt-sub-section">
+                <button class="btn btn-danger" onclick="openDebtModal('owed_by_me')"><i class="fa-solid fa-plus"></i> দেনা যোগ করুন</button>
+                <div id="list-owed-by-me" class="card-list"></div>
+            </div>
+            <div id="section-owed-to-me" class="debt-sub-section" style="display: none;">
+                <button class="btn btn-success" onclick="openDebtModal('owed_to_me')"><i class="fa-solid fa-plus"></i> পাওনা যোগ করুন</button>
+                <div id="list-owed-to-me" class="card-list"></div>
+            </div>
+        </section>
+
+        <!-- সঞ্চয় -->
+        <section id="tab-savings" class="tab-content">
+            <h2>সঞ্চয় লক্ষ্য (Savings Goals)</h2>
+            <button class="btn btn-warning" onclick="openSavingsModal()"><i class="fa-solid fa-plus"></i> নতুন সঞ্চয় লক্ষ্য</button>
+            <div id="savings-goals-list" class="card-list" style="margin-top:15px;"></div>
+        </section>
+
+        <!-- হিসাব -->
+        <section id="tab-accounts" class="tab-content">
+            <h2>অ্যাকাউন্ট ও ট্রান্সফার</h2>
+            <div class="summary-cards" style="margin-bottom:15px;">
+                <div class="card"><h3>নগদ ক্যাশ</h3><p id="acc-cash">0.00 EGP</p></div>
+                <div class="card"><h3>ব্যাংক অ্যাকাউন্ট</h3><p id="acc-bank">0.00 EGP</p></div>
+                <div class="card"><h3>মোবাইল ওয়ালেট</h3><p id="acc-wallet">0.00 EGP</p></div>
+            </div>
+            <div class="settings-card">
+                <h3>নিজের অ্যাকাউন্টগুলোর মধ্যে ট্রান্সফার</h3>
+                <form id="transfer-form" onsubmit="handleTransfer(event)">
+                    <div class="form-group"><label>উৎস অ্যাকাউন্ট</label><select id="transfer-from-acc" required><option value="cash">নগদ ক্যাশ</option><option value="bank">ব্যাংক অ্যাকাউন্ট</option><option value="wallet">মোবাইল ওয়ালেট</option></select></div>
+                    <div class="form-group"><label>গন্তব্য অ্যাকাউন্ট</label><select id="transfer-to-acc" required><option value="bank">ব্যাংক অ্যাকাউন্ট</option><option value="cash">নগদ ক্যাশ</option><option value="wallet">মোবাইল ওয়ালেট</option></select></div>
+                    <div class="form-group"><label>পরিমাণ (EGP)</label><input type="number" step="0.01" id="transfer-amount" required></div>
+                    <button type="submit" class="btn btn-primary">টাকা ট্রান্সফার করুন</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- ইতিহাস -->
+        <section id="tab-history" class="tab-content">
+            <h2>সকল লেনদেনের ইতিহাস</h2>
+            <div class="filter-box"><input type="text" id="search-history" placeholder="ইতিহাস খুঁজুন..." oninput="filterHistory()"></div>
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead><tr><th>তারিখ</th><th>ধরণ</th><th>বিবরণ</th><th>পরিমাণ</th><th>অ্যাকাউন্ট</th><th>অ্যাকশন</th></tr></thead>
+                    <tbody id="history-table-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- রিপোর্ট -->
+        <section id="tab-reports" class="tab-content">
+            <h2>মাসিক ও বাৎসরিক রিপোর্ট</h2>
+            <div class="form-group"><label>মাস নির্বাচন করুন</label><input type="month" id="report-month-select" onchange="generateReports()"></div>
+            <div id="report-content" class="settings-card" style="margin-top:15px;"></div>
+        </section>
+
+        <!-- সেটিংস -->
+        <section id="tab-settings" class="tab-content">
+            <h2>ব্যাকআপ ও সেটিংস</h2>
+            <div class="settings-card">
+                <h3>ডেটা ব্যাকআপ (JSON)</h3>
+                <p>সব রেকর্ড সুরক্ষিত রাখতে ব্যাকআপ ফাইল ডাউনলোড করুন।</p>
+                <button class="btn btn-primary" onclick="exportBackup()"><i class="fa-solid fa-download"></i> ব্যাকআপ ডাউনলোড</button>
+            </div>
+            <div class="settings-card">
+                <h3>ডেটা রিস্টোর করুন</h3>
+                <p>পূর্বের ব্যাকআপ ফাইল থেকে ডেটা পুনরুদ্ধার করুন।</p>
+                <input type="file" id="import-file" accept=".json" onchange="importBackup(event)">
+            </div>
+            <div class="settings-card">
+                <h3>CSV এক্সপোর্ট</h3>
+                <p>এক্সেলের জন্য CSV ফরম্যাটে এক্সপোর্ট করুন।</p>
+                <button class="btn btn-success" onclick="exportCSV()"><i class="fa-solid fa-file-excel"></i> CSV ডাউনলোড</button>
+            </div>
+            <div class="settings-card bg-danger-light">
+                <h3>সব ডেটা মুছে ফেলুন</h3>
+                <p class="text-danger">সতর্কতা: এটি আপনার সব লোকাল ডেটা স্থায়ীভাবে মুছে ফেলবে।</p>
+                <button class="btn btn-danger" onclick="clearAllData()"><i class="fa-solid fa-trash"></i> সকল ডেটা রিসেট</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('dashboard', this)"><i class="fa-solid fa-house"></i><span>ড্যাশবোর্ড</span></button>
+        <button class="nav-item" onclick="switchTab('income', this)"><i class="fa-solid fa-arrow-trend-up"></i><span>আয়</span></button>
+        <button class="nav-item" onclick="switchTab('expense', this)"><i class="fa-solid fa-arrow-trend-down"></i><span>খরচ</span></button>
+        <button class="nav-item" onclick="switchTab('budget', this)"><i class="fa-solid fa-chart-pie"></i><span>বাজেট</span></button>
+        <button class="nav-item" onclick="switchTab('debt', this)"><i class="fa-solid fa-handshake-angle"></i><span>ঋণ</span></button>
+        <button class="nav-item" onclick="switchTab('savings', this)"><i class="fa-solid fa-piggy-bank"></i><span>সঞ্চয়</span></button>
+        <button class="nav-item" onclick="switchTab('accounts', this)"><i class="fa-solid fa-wallet"></i><span>হিসাব</span></button>
+        <button class="nav-item" onclick="switchTab('history', this)"><i class="fa-solid fa-clock-rotate-left"></i><span>ইতিহাস</span></button>
+        <button class="nav-item" onclick="switchTab('reports', this)"><i class="fa-solid fa-file-lines"></i><span>রিপোর্ট</span></button>
+        <button class="nav-item" onclick="switchTab('settings', this)"><i class="fa-solid fa-gear"></i><span>সেটিংস</span></button>
+    </nav>
+
+    <!-- Modals -->
+    <div id="income-modal" class="modal"><div class="modal-content"><span class="close" onclick="closeIncomeModal()">&times;</span><h3>আয় যোগ করুন</h3><form id="income-form" onsubmit="saveIncome(event)"><input type="hidden" id="income-id"><div class="form-group"><label>তারিখ</label><input type="date" id="income-date" required></div><div class="form-group"><label>উৎস</label><select id="income-source" required><option value="আল-আহহার স্কলারশিপ">আল-আহহার স্কলারশিপ</option><option value="অন্যান্য স্কলারশিপ">অন্যান্য স্কলারশিপ</option><option value="আর্থিক সহায়তা">আর্থিক সহায়তা</option><option value="পারিবারিক সহায়তা">পারিবারিক সহায়তা</option><option value="খণ্ডকালীন কাজ">খণ্ডকালীন কাজ</option><option value="শিক্ষাদান (টিউশন)">শিক্ষাদান (টিউশন)</option><option value="অন্যান্য">অন্যান্য আয়</option></select></div><div class="form-group"><label>পরিমাণ (EGP)</label><input type="number" step="0.01" id="income-amount" required></div><div class="form-group"><label>অ্যাকাউন্ট</label><select id="income-account" required><option value="cash">নগদ ক্যাশ</option><option value="bank">ব্যাংক অ্যাকাউন্ট</option><option value="wallet">মোবাইল ওয়ালেট</option></select></div><div class="form-group"><label>বিবরণ / নোট</label><input type="text" id="income-notes"></div><button type="submit" class="btn btn-primary">সংরক্ষণ করুন</button></form></div></div>
+
+    <div id="expense-modal" class="modal"><div class="modal-content"><span class="close" onclick="closeExpenseModal()">&times;</span><h3>খরচ যোগ করুন</h3><form id="expense-form" onsubmit="saveExpense(event)"><input type="hidden" id="expense-id"><div class="form-group"><label>তারিখ</label><input type="date" id="expense-date" required></div><div class="form-group"><label>ক্যাটাগরি</label><select id="expense-category" required><option value="খাবার ও বাজার">খাবার ও বাজার</option><option value="বাসাভাড়া">বাসাভাড়া</option><option value="বিদ্যুৎ ও ইউটিলিটি">বিদ্যুৎ ও ইউটিলিটি</option><option value="ইন্টারনেট ও মোবাইল ডাটা">ইন্টারনেট ও মোবাইল ডাটা</option><option value="যাতায়াত">যাতায়াত</option><option value="বিশ্ববিদ্যালয় খরচ">বিশ্ববিদ্যালয় খরচ</option><option value="বই ও স্টেশনারি">বই ও স্টেশনারি</option><option value="স্বাস্থ্যসেবা">স্বাস্থ্যসেবা</option><option value="পোশাক-আশাক">পোশাক-আশাক</option><option value="ব্যক্তিগত খরচ">ব্যক্তিগত খরচ</option><option value="পারিবারিক সহায়তা">পারিবারিক সহায়তা</option><option value="ঋণ পরিশোধ">ঋণ পরিশোধ</option><option value="অন্যান্য খরচ">অন্যান্য খরচ</option></select></div><div class="form-group"><label>পরিমাণ (EGP)</label><input type="number" step="0.01" id="expense-amount" required></div><div class="form-group"><label>অ্যাকাউন্ট</label><select id="expense-account" required><option value="cash">নগদ ক্যাশ</option><option value="bank">ব্যাংক অ্যাকাউন্ট</option><option value="wallet">মোবাইল ওয়ালেট</option></select></div><div class="form-group"><label>বিবরণ / নোট</label><input type="text" id="expense-notes"></div><button type="submit" class="btn btn-danger">সংরক্ষণ করুন</button></form></div></div>
+
+    <div id="budget-modal" class="modal"><div class="modal-content"><span class="close" onclick="closeBudgetModal()">&times;</span><h3>মাসিক বাজেট সেট করুন</h3><form id="budget-form" onsubmit="saveBudget(event)"><div class="form-group"><label>মাস</label><input type="month" id="budget-month" required></div><div class="form-group"><label>ক্যাটাগরি</label><select id="budget-category" required><option value="খাবার ও বাজার">খাবার ও বাজার</option><option value="বাসাভাড়া">বাসাভাড়া</option><option value="বিদ্যুৎ ও ইউটিলিটি">বিদ্যুৎ ও ইউটিলিটি</option><option value="ইন্টারনেট ও মোবাইল ডাটা">ইন্টারনেট ও মোবাইল ডাটা</option><option value="যাতায়াত">যাতায়াত</option><option value="বিশ্ববিদ্যালয় খরচ">বিশ্ববিদ্যালয় খরচ</option><option value="বই ও স্টেশনারি">বই ও স্টেশনারি</option><option value="স্বাস্থ্যসেবা">স্বাস্থ্যসেবা</option><option value="পোশাক-আশাক">পোশাক-আশাক</option><option value="ব্যক্তিগত খরচ">ব্যক্তিগত খরচ</option><option value="পারিবারিক সহায়তা">পারিবারিক সহায়তা</option><option value="অন্যান্য খরচ">অন্যান্য খরচ</option></select></div><div class="form-group"><label>বাজেটের পরিমাণ (EGP)</label><input type="number" step="0.01" id="budget-limit" required></div><button type="submit" class="btn btn-primary">বাজেট সংরক্ষণ</button></form></div></div>
+
+    <div id="debt-modal" class="modal"><div class="modal-content"><span class="close" onclick="closeDebtModal()">&times;</span><h3 id="debt-modal-title">ঋণ বা পাওনা যোগ করুন</h3><form id="debt-form" onsubmit="saveDebtRecord(event)"><input type="hidden" id="debt-type"><input type="hidden" id="debt-id"><div class="form-group"><label>ব্যক্তির নাম</label><input type="text" id="debt-person" required></div><div class="form-group"><label>মূল পরিমাণ (EGP)</label><input type="number" step="0.01" id="debt-amount" required></div><div class="form-group"><label>পরিশোধ/গ্রহণকৃত পরিমাণ</label><input type="number" step="0.01" id="debt-paid" value="0"></div><div class="form-group"><label>তারিখ</label><input type="date" id="debt-date" required></div><div class="form-group"><label>শেষ তারিখ (Due Date)</label><input type="date" id="debt-duedate"></div><div class="form-group"><label>বিবরণ / কারণ</label><input type="text" id="debt-desc"></div><button type="submit" class="btn btn-primary">সংরক্ষণ করুন</button></form></div></div>
+
+    <div id="savings-modal" class="modal"><div class="modal-content"><span class="close" onclick="closeSavingsModal()">&times;</span><h3>সঞ্চয় লক্ষ্য যোগ করুন</h3><form id="savings-form" onsubmit="saveSavingsGoal(event)"><div class="form-group"><label>লক্ষ্যের নাম</label><input type="text" id="savings-title" required></div><div class="form-group"><label>টার্গেট পরিমাণ (EGP)</label><input type="number" step="0.01" id="savings-target" required></div><div class="form-group"><label>বর্তমানে জমা আছে (EGP)</label><input type="number" step="0.01" id="savings-current" value="0" required></div><button type="submit" class="btn btn-warning">লক্ষ্য সংরক্ষণ</button></form></div></div>
+</div>
+
+<!-- FontAwesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                  
